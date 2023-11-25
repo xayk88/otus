@@ -1,0 +1,444 @@
+Script started on Sat Nov 25 20:36:07 2023
+]0;vagrant@otuslinux:~[?1034h[vagrant@otuslinux ~]$ sudo -i
+]0;root@otuslinux:~[?1034h[root@otuslinux ~]# echo я уже добавил пару дисков в vagrantfile чтобы с[K[K[K[K[K[K[K[K[Ke. Будем пробовать собрать raid10 на шести дисках (собственно это[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K
+я уже добавил пару дисков в vagrantfile. Будем пробовать собрать raid10 на шести дисках
+]0;root@otuslinux:~[root@otuslinux ~]# wf[K[Kfdisk -l
+
+Disk /dev/sda: 42.9 GB, 42949672960 bytes, 83886080 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk label type: dos
+Disk identifier: 0x0009ef1a
+
+   Device Boot      Start         End      Blocks   Id  System
+/dev/sda1   *        2048    83886079    41942016   83  Linux
+
+Disk /dev/sdc: 262 MB, 262144000 bytes, 512000 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
+Disk /dev/sdb: 262 MB, 262144000 bytes, 512000 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
+Disk /dev/sdd: 262 MB, 262144000 bytes, 512000 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
+Disk /dev/sde: 262 MB, 262144000 bytes, 512000 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
+Disk /dev/sdg: 262 MB, 262144000 bytes, 512000 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
+Disk /dev/sdf: 262 MB, 262144000 bytes, 512000 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+]0;root@otuslinux:~[root@otuslinux ~]# fdisk -l | DiskgDiskrDiskeDiskpDisk Disk
+[01;31m[KDisk[m[K /dev/sda: 42.9 GB, 42949672960 bytes, 83886080 sectors
+[01;31m[KDisk[m[K label type: dos
+[01;31m[KDisk[m[K identifier: 0x0009ef1a
+[01;31m[KDisk[m[K /dev/sdc: 262 MB, 262144000 bytes, 512000 sectors
+[01;31m[KDisk[m[K /dev/sdb: 262 MB, 262144000 bytes, 512000 sectors
+[01;31m[KDisk[m[K /dev/sdd: 262 MB, 262144000 bytes, 512000 sectors
+[01;31m[KDisk[m[K /dev/sde: 262 MB, 262144000 bytes, 512000 sectors
+[01;31m[KDisk[m[K /dev/sdg: 262 MB, 262144000 bytes, 512000 sectors
+[01;31m[KDisk[m[K /dev/sdf: 262 MB, 262144000 bytes, 512000 sectors
+]0;root@otuslinux:~[root@otuslinux ~]# mdadm --zero-superblock --force /dev/sd{b,c,d,e,f,g}
+mdadm: Unrecognised md component device - /dev/sdb
+mdadm: Unrecognised md component device - /dev/sdc
+mdadm: Unrecognised md component device - /dev/sdd
+mdadm: Unrecognised md component device - /dev/sde
+mdadm: Unrecognised md component device - /dev/sdf
+mdadm: Unrecognised md component device - /dev/sdg
+]0;root@otuslinux:~[root@otuslinux ~]# mdadm --create --verbose /dev/md0 -l 10 -n 6 /dev/sd{b,c,d,e,f,g}
+mdadm: layout defaults to n2
+mdadm: layout defaults to n2
+mdadm: chunk size defaults to 512K
+mdadm: size set to 253952K
+mdadm: Defaulting to version 1.2 metadata
+mdadm: array /dev/md0 started.
+]0;root@otuslinux:~[root@otuslinux ~]# cat /proc/mdstat 
+Personalities : [raid10] 
+md0 : active raid10 sdg[5] sdf[4] sde[3] sdd[2] sdc[1] sdb[0]
+      761856 blocks super 1.2 512K chunks 2 near-copies [6/6] [UUUUUU]
+      
+unused devices: <none>
+]0;root@otuslinux:~[root@otuslinux ~]# mdadm -D /dev/md0 
+/dev/md0:
+           Version : 1.2
+     Creation Time : Sat Nov 25 20:39:47 2023
+        Raid Level : raid10
+        Array Size : 761856 (744.00 MiB 780.14 MB)
+     Used Dev Size : 253952 (248.00 MiB 260.05 MB)
+      Raid Devices : 6
+     Total Devices : 6
+       Persistence : Superblock is persistent
+
+       Update Time : Sat Nov 25 20:39:51 2023
+             State : clean 
+    Active Devices : 6
+   Working Devices : 6
+    Failed Devices : 0
+     Spare Devices : 0
+
+            Layout : near=2
+        Chunk Size : 512K
+
+Consistency Policy : resync
+
+              Name : otuslinux:0  (local to host otuslinux)
+              UUID : 867efa8e:ee6ebdcb:cf30c8c5:53f0a6d0
+            Events : 17
+
+    Number   Major   Minor   RaidDevice State
+       0       8       16        0      active sync set-A   /dev/sdb
+       1       8       32        1      active sync set-B   /dev/sdc
+       2       8       48        2      active sync set-A   /dev/sdd
+       3       8       64        3      active sync set-B   /dev/sde
+       4       8       80        4      active sync set-A   /dev/sdf
+       5       8       96        5      active sync set-B   /dev/sdg
+]0;root@otuslinux:~[root@otuslinux ~]# 
+]0;root@otuslinux:~[root@otuslinux ~]# mdadm --detail --scan --verbose 
+ARRAY /dev/md0 level=raid10 num-devices=6 metadata=1.2 name=otuslinux:0 UUID=867efa8e:ee6ebdcb:cf30c8c5:53f0a6d0
+   devices=/dev/sdb,/dev/sdc,/dev/sdd,/dev/sde,/dev/sdf,/dev/sdg
+]0;root@otuslinux:~[root@otuslinux ~]# mkdir /etc/mdadm
+]0;root@otuslinux:~[root@otuslinux ~]# touch /etc/mdadm/mdadm.conf
+]0;root@otuslinux:~[root@otuslinux ~]# echo "DEVICE partitions" > /etc/mdadm/mdadm.conf 
+]0;root@otuslinux:~[root@otuslinux ~]# mdadm --echo "DEVICE partitions" > /etc/mdadm/mdadm.conf [C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[22Ptouch /etc/mdadm/mdadm.conf[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[11Pmkdir /etc/mdadmdadm --detail --scan --verbose | awk '/ARRAY'[K/'[K {print}' >> /etc/mdadm/mdadm.conf 
+]0;root@otuslinux:~[root@otuslinux ~]# cat /etc/mdadm/mdadm.conf 
+DEVICE partitions
+ARRAY /dev/md0 level=raid10 num-devices=6 metadata=1.2 name=otuslinux:0 UUID=867efa8e:ee6ebdcb:cf30c8c5:53f0a6d0
+]0;root@otuslinux:~[root@otuslinux ~]# echo при первом про[K[K[K"прогоне" по методичке уже проверил - рейд собирается, но без доп. телодвиженией[K[Kй не подмонтируются создаваемые вп[K последствии разделы.[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[1@п[1@о[1@с[1@л[1@е[1@ [1@п[1@е[C[1@р[1@е[1@з[1@а[1@г[C[1@р[1@у[1@з[1@к[1@и[1@ [C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C С[KЧто и следовало ожидать =)
+-bash: syntax error near unexpected token `)'
+]0;root@otuslinux:~[root@otuslinux ~]# echo при первом "прогоне" по методичке уже проверил - после перезагрузки рейд собирается, но без доп. телодвижений не подмонтируются создаваемые в последствии разделы. Что и следовало ожидать =)э[K'[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[1@'
+при первом "прогоне" по методичке уже проверил - после перезагрузки рейд собирается, но без доп. телодвижений не подмонтируются создаваемые в последствии разделы. Что и следовало ожидать =)
+]0;root@otuslinux:~[root@otuslinux ~]# 
+]0;root@otuslinux:~[root@otuslinux ~]# 
+]0;root@otuslinux:~[root@otuslinux ~]# ьвф[K[K[Kmdadm /dev/md0 --fail /dev/sde[Kg
+mdadm: set /dev/sdg faulty in /dev/md0
+]0;root@otuslinux:~[root@otuslinux ~]# echo пометили сбойным последний диск в рейде
+пометили сбойным последний диск в рейде
+]0;root@otuslinux:~[root@otuslinux ~]# cat /pro[K[K[Kpo[Kroc/mdstat 
+Personalities : [raid10] 
+md0 : active raid10 sdg[5](F) sdf[4] sde[3] sdd[2] sdc[1] sdb[0]
+      761856 blocks super 1.2 512K chunks 2 near-copies [6/5] [UUUUU_]
+      
+unused devices: <none>
+]0;root@otuslinux:~[root@otuslinux ~]# mdadm -D /dev/md0 
+/dev/md0:
+           Version : 1.2
+     Creation Time : Sat Nov 25 20:39:47 2023
+        Raid Level : raid10
+        Array Size : 761856 (744.00 MiB 780.14 MB)
+     Used Dev Size : 253952 (248.00 MiB 260.05 MB)
+      Raid Devices : 6
+     Total Devices : 6
+       Persistence : Superblock is persistent
+
+       Update Time : Sat Nov 25 20:44:49 2023
+             State : clean, degraded 
+    Active Devices : 5
+   Working Devices : 5
+    Failed Devices : 1
+     Spare Devices : 0
+
+            Layout : near=2
+        Chunk Size : 512K
+
+Consistency Policy : resync
+
+              Name : otuslinux:0  (local to host otuslinux)
+              UUID : 867efa8e:ee6ebdcb:cf30c8c5:53f0a6d0
+            Events : 19
+
+    Number   Major   Minor   RaidDevice State
+       0       8       16        0      active sync set-A   /dev/sdb
+       1       8       32        1      active sync set-B   /dev/sdc
+       2       8       48        2      active sync set-A   /dev/sdd
+       3       8       64        3      active sync set-B   /dev/sde
+       4       8       80        4      active sync set-A   /dev/sdf
+       -       0        0        5      removed
+
+       5       8       96        -      faulty   /dev/sdg
+]0;root@otuslinux:~[root@otuslinux ~]# mdadm /dev/md0 --remove /dev/dsg[K[K[Ksdg
+mdadm: hot removed /dev/sdg from /dev/md0
+]0;root@otuslinux:~[root@otuslinux ~]# 
+]0;root@otuslinux:~[root@otuslinux ~]# 
+]0;root@otuslinux:~[root@otuslinux ~]# mdadm /dev/md0 --remove /dev/sdg[14P-D /dev/md0 
+/dev/md0:
+           Version : 1.2
+     Creation Time : Sat Nov 25 20:39:47 2023
+        Raid Level : raid10
+        Array Size : 761856 (744.00 MiB 780.14 MB)
+     Used Dev Size : 253952 (248.00 MiB 260.05 MB)
+      Raid Devices : 6
+     Total Devices : 5
+       Persistence : Superblock is persistent
+
+       Update Time : Sat Nov 25 20:45:46 2023
+             State : clean, degraded 
+    Active Devices : 5
+   Working Devices : 5
+    Failed Devices : 0
+     Spare Devices : 0
+
+            Layout : near=2
+        Chunk Size : 512K
+
+Consistency Policy : resync
+
+              Name : otuslinux:0  (local to host otuslinux)
+              UUID : 867efa8e:ee6ebdcb:cf30c8c5:53f0a6d0
+            Events : 20
+
+    Number   Major   Minor   RaidDevice State
+       0       8       16        0      active sync set-A   /dev/sdb
+       1       8       32        1      active sync set-B   /dev/sdc
+       2       8       48        2      active sync set-A   /dev/sdd
+       3       8       64        3      active sync set-B   /dev/sde
+       4       8       80        4      active sync set-A   /dev/sdf
+       -       0        0        5      removed
+]0;root@otuslinux:~[root@otuslinux ~]# mdadm -D /dev/md0 /dev/md0 --remove /dev/sdg[14P-D /dev/md0 [1Pcat /proc/mdstat[C
+Personalities : [raid10] 
+md0 : active raid10 sdf[4] sde[3] sdd[2] sdc[1] sdb[0]
+      761856 blocks super 1.2 512K chunks 2 near-copies [6/5] [UUUUU_]
+      
+unused devices: <none>
+]0;root@otuslinux:~[root@otuslinux ~]# mdadm --zero-superblock --force /dev/dsg
+mdadm: Couldn't open /dev/dsg for write - not zeroing
+]0;root@otuslinux:~[root@otuslinux ~]# echo Вот этот момент н[Kне понятен% [K[K: почему система пишет, что диск недоступен для записи? Я [K[KМы же его[K[K[K[K[K[K[K[K[KЯ же его только что исключил из рейда. Он конечно потом благополучно подцепится в рейд обратно при необходимости, но почему сейчас  удаление суперблоков невозможно[K[K[K[K[K[K[K[K проходит? До сборки рейда при вводе этой же команды был получен другой отклик системы
+Вот этот момент не понятен: почему система пишет, что диск недоступен для записи? Я же его только что исключил из рейда. Он конечно потом благополучно подцепится в рейд обратно при необходимости, но почему сейчас удаление суперблоков не проходит? До сборки рейда при вводе этой же команды был получен другой отклик системы
+]0;root@otuslinux:~[root@otuslinux ~]# echo Вот этот момент не понятен: почему система пишет, что диск недоступен для записи? Я же его только что исключил из рейда. Он конечно потом благополучно подцепится в рейд обратно при необходимости, но почему сейчас уудаление суперблоков не проходит? До сборки рейда при вводе этой же команды был получен другой отклик системы[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Cmdadm --zero-superblock --force /dev/dsg[K
+[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[23Pcat /proc/mdstat [1@mdadm -D /dev/md0[C/dev/md0 --remove /dev/sdg[1P /dev/sdg[1P /dev/sdg[1P /dev/sdg[1P /dev/sdg[1P /dev/sdga /dev/sdgd /dev/sdgd /dev/sdg[1P /dev/sdg[1P /dev/sdg[1P /dev/sdg[1P /dev/sdga /dev/sdgd /dev/sdgd /dev/sdg
+mdadm: added /dev/sdg
+]0;root@otuslinux:~[root@otuslinux ~]# ca [Kt /pt[Kroc/mdstat 
+Personalities : [raid10] 
+md0 : active raid10 sdg[6] sdf[4] sde[3] sdd[2] sdc[1] sdb[0]
+      761856 blocks super 1.2 512K chunks 2 near-copies [6/6] [UUUUUU]
+      
+unused devices: <none>
+]0;root@otuslinux:~[root@otuslinux ~]# mdadm -D /dev/md0 
+/dev/md0:
+           Version : 1.2
+     Creation Time : Sat Nov 25 20:39:47 2023
+        Raid Level : raid10
+        Array Size : 761856 (744.00 MiB 780.14 MB)
+     Used Dev Size : 253952 (248.00 MiB 260.05 MB)
+      Raid Devices : 6
+     Total Devices : 6
+       Persistence : Superblock is persistent
+
+       Update Time : Sat Nov 25 20:48:23 2023
+             State : clean 
+    Active Devices : 6
+   Working Devices : 6
+    Failed Devices : 0
+     Spare Devices : 0
+
+            Layout : near=2
+        Chunk Size : 512K
+
+Consistency Policy : resync
+
+              Name : otuslinux:0  (local to host otuslinux)
+              UUID : 867efa8e:ee6ebdcb:cf30c8c5:53f0a6d0
+            Events : 39
+
+    Number   Major   Minor   RaidDevice State
+       0       8       16        0      active sync set-A   /dev/sdb
+       1       8       32        1      active sync set-B   /dev/sdc
+       2       8       48        2      active sync set-A   /dev/sdd
+       3       8       64        3      active sync set-B   /dev/sde
+       4       8       80        4      active sync set-A   /dev/sdf
+       6       8       96        5      active sync set-B   /dev/sdg
+]0;root@otuslinux:~[root@otuslinux ~]# parted -s /dev/md0 mklabel gpt
+]0;root@otuslinux:~[root@otuslinux ~]# pat[Krted /dev/md0 mkpart primary ext4 0% 20%
+Information: You may need to update /etc/fstab.
+
+[?1034h                                                                          ]0;root@otuslinux:~[root@otuslinux ~]# parted /dev/md0 mkpart primary ext4 0% 20%[1P0%40%[1@2
+Information: You may need to update /etc/fstab.
+
+[?1034h                                                                          ]0;root@otuslinux:~[root@otuslinux ~]# parted /dev/md0 mkpart primary ext4 20% 40%[1P0%60%[1P[1@4
+Information: You may need to update /etc/fstab.
+
+[?1034h                                                                          ]0;root@otuslinux:~[root@otuslinux ~]# parted /dev/md0 mkpart primary ext4 40% 60%[1P0%80%[1P[1@6
+Information: You may need to update /etc/fstab.
+
+[?1034h                                                                          ]0;root@otuslinux:~[root@otuslinux ~]# parted /dev/md0 mkpart primary ext4 60% 80%[1P0%10%[C0%[1P[1@8
+Information: You may need to update /etc/fstab.
+
+[?1034h                                                                          ]0;root@otuslinux:~[root@otuslinux ~]# mkfs.ext
+mkfs.ext2  mkfs.ext3  mkfs.ext4  
+[root@otuslinux ~]# mkfs.ext4 /dev/md0
+md0    md0p1  md0p2  md0p3  md0p4  md0p5  
+[root@otuslinux ~]# mkfs.ext4 /dev/md0
+md0    md0p1  md0p2  md0p3  md0p4  md0p5  
+[root@otuslinux ~]# mkfs.ext4 /dev/md0p1
+mke2fs 1.42.9 (28-Dec-2013)
+Filesystem label=
+OS type: Linux
+Block size=1024 (log=0)
+Fragment size=1024 (log=0)
+Stride=512 blocks, Stripe width=1536 blocks
+37696 inodes, 150528 blocks
+7526 blocks (5.00%) reserved for the super user
+First data block=1
+Maximum filesystem blocks=33816576
+19 block groups
+8192 blocks per group, 8192 fragments per group
+1984 inodes per group
+Superblock backups stored on blocks: 
+	8193, 24577, 40961, 57345, 73729
+
+Allocating group tables:  0/19     done                            
+Writing inode tables:  0/19     done                            
+Creating journal (4096 blocks): done
+Writing superblocks and filesystem accounting information:  0/19     done
+
+]0;root@otuslinux:~[root@otuslinux ~]# mkfs.ext4 /dev/md0p1[K2
+mke2fs 1.42.9 (28-Dec-2013)
+Filesystem label=
+OS type: Linux
+Block size=1024 (log=0)
+Fragment size=1024 (log=0)
+Stride=512 blocks, Stripe width=1536 blocks
+38152 inodes, 152064 blocks
+7603 blocks (5.00%) reserved for the super user
+First data block=1
+Maximum filesystem blocks=33816576
+19 block groups
+8192 blocks per group, 8192 fragments per group
+2008 inodes per group
+Superblock backups stored on blocks: 
+	8193, 24577, 40961, 57345, 73729
+
+Allocating group tables:  0/19     done                            
+Writing inode tables:  0/19     done                            
+Creating journal (4096 blocks): done
+Writing superblocks and filesystem accounting information:  0/19     done
+
+]0;root@otuslinux:~[root@otuslinux ~]# mkfs.ext4 /dev/md0p2[K3
+mke2fs 1.42.9 (28-Dec-2013)
+Filesystem label=
+OS type: Linux
+Block size=1024 (log=0)
+Fragment size=1024 (log=0)
+Stride=512 blocks, Stripe width=1536 blocks
+38456 inodes, 153600 blocks
+7680 blocks (5.00%) reserved for the super user
+First data block=1
+Maximum filesystem blocks=33816576
+19 block groups
+8192 blocks per group, 8192 fragments per group
+2024 inodes per group
+Superblock backups stored on blocks: 
+	8193, 24577, 40961, 57345, 73729
+
+Allocating group tables:  0/19     done                            
+Writing inode tables:  0/19     done                            
+Creating journal (4096 blocks): done
+Writing superblocks and filesystem accounting information:  0/19     done
+
+]0;root@otuslinux:~[root@otuslinux ~]# mkfs.ext4 /dev/md0p32123[Kmkfs.ext4 /dev/md0p3[K4
+mke2fs 1.42.9 (28-Dec-2013)
+Filesystem label=
+OS type: Linux
+Block size=1024 (log=0)
+Fragment size=1024 (log=0)
+Stride=512 blocks, Stripe width=1536 blocks
+38152 inodes, 152064 blocks
+7603 blocks (5.00%) reserved for the super user
+First data block=1
+Maximum filesystem blocks=33816576
+19 block groups
+8192 blocks per group, 8192 fragments per group
+2008 inodes per group
+Superblock backups stored on blocks: 
+	8193, 24577, 40961, 57345, 73729
+
+Allocating group tables:  0/19     done                            
+Writing inode tables:  0/19     done                            
+Creating journal (4096 blocks): done
+Writing superblocks and filesystem accounting information:  0/19     done
+
+]0;root@otuslinux:~[root@otuslinux ~]# mkfs.ext4 /dev/md0p4[K5
+mke2fs 1.42.9 (28-Dec-2013)
+Filesystem label=
+OS type: Linux
+Block size=1024 (log=0)
+Fragment size=1024 (log=0)
+Stride=512 blocks, Stripe width=1536 blocks
+37696 inodes, 150528 blocks
+7526 blocks (5.00%) reserved for the super user
+First data block=1
+Maximum filesystem blocks=33816576
+19 block groups
+8192 blocks per group, 8192 fragments per group
+1984 inodes per group
+Superblock backups stored on blocks: 
+	8193, 24577, 40961, 57345, 73729
+
+Allocating group tables:  0/19     done                            
+Writing inode tables:  0/19     done                            
+Creating journal (4096 blocks): done
+Writing superblocks and filesystem accounting information:  0/19     done
+
+]0;root@otuslinux:~[root@otuslinux ~]# 
+]0;root@otuslinux:~[root@otuslinux ~]# 
+]0;root@otuslinux:~[root@otuslinux ~]# 
+]0;root@otuslinux:~[root@otuslinux ~]# df -h
+Filesystem      Size  Used Avail Use% Mounted on
+devtmpfs        489M     0  489M   0% /dev
+tmpfs           496M     0  496M   0% /dev/shm
+tmpfs           496M  6.7M  489M   2% /run
+tmpfs           496M     0  496M   0% /sys/fs/cgroup
+/dev/sda1        40G  3.2G   37G   8% /
+tmpfs           100M     0  100M   0% /run/user/1000
+]0;root@otuslinux:~[root@otuslinux ~]# mkdir[K[K[K[K[Kecho Забыл создать каталогии [K[Kи [K[K и подмонтировать
+Забыл создать каталоги и подмонтировать
+]0;root@otuslinux:~[root@otuslinux ~]# mkdir -p /raid/part{1,2,3,4,5][K}
+]0;root@otuslinux:~[root@otuslinux ~]# for i in $(seq 1 5); do mount /dev/md0
+md0    md0p1  md0p2  md0p3  md0p4  md0p5  
+[root@otuslinux ~]# for i in $(seq 1 5); do mount /dev/md0p$i /raid/part$i; done
+]0;root@otuslinux:~[root@otuslinux ~]# df -h
+Filesystem      Size  Used Avail Use% Mounted on
+devtmpfs        489M     0  489M   0% /dev
+tmpfs           496M     0  496M   0% /dev/shm
+tmpfs           496M  6.7M  489M   2% /run
+tmpfs           496M     0  496M   0% /sys/fs/cgroup
+/dev/sda1        40G  3.2G   37G   8% /
+tmpfs           100M     0  100M   0% /run/user/1000
+/dev/md0p1      139M  1.6M  127M   2% /raid/part1
+/dev/md0p2      140M  1.6M  128M   2% /raid/part2
+/dev/md0p3      142M  1.6M  130M   2% /raid/part3
+/dev/md0p4      140M  1.6M  128M   2% /raid/part4
+/dev/md0p5      139M  1.6M  127M   2% /raid/part5
+]0;root@otuslinux:~[root@otuslinux ~]# аыеф[K[K[K[Kfsta[K[K[K[K
+]0;root@otuslinux:~[root@otuslinux ~]# script 
+anaconda-ks.cfg  .bash_logout     .bash_profile    .bashrc          .cshrc           original-ks.cfg  .ssh/            .tcshrc          
+[root@otuslinux ~]# script exit
+Script started, file is exit
+]0;root@otuslinux:~[?1034h[root@otuslinux ~]# 
+]0;root@otuslinux:~[root@otuslinux ~]# 
+]0;root@otuslinux:~[root@otuslinux ~]# 
+]0;root@otuslinux:~[root@otuslinux ~]# 
+]0;root@otuslinux:~[root@otuslinux ~]# nano /vaga[Krant/
+md_script_01  test          
+[root@otuslinux ~]# nano /vagrant/md_script_01 
+bash: nano: command not f

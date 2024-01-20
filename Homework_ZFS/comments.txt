@@ -1,0 +1,29 @@
+1. Определить алгоритм с наилучшим сжатием:
+[root@zfs vagrant]# zfs get all | grep compressratio | grep -v ref
+otus1  compressratio         1.81x                  -
+otus2  compressratio         2.22x                  -
+otus3  compressratio         3.65x                  - << gzip-9 показал лучший процент сжатия
+otus4  compressratio         1.00x    
+
+2. Определить настройки пула:
+root@zfs vagrant]# zfs get readonly otus
+NAME  PROPERTY  VALUE   SOURCE
+otus  readonly  off     default
+root@zfs vagrant]# zfs get recordsize otus
+NAME  PROPERTY    VALUE    SOURCE
+otus  recordsize  128K     local
+root@zfs vagrant]# zfs get compression otus
+NAME  PROPERTY     VALUE     SOURCE
+otus  compression  zle       local
+root@zfs vagrant]# zfs get checksum otus
+NAME  PROPERTY  VALUE      SOURCE
+otus  checksum  sha256     local
+
+Метод сжатия отдельно забыл вывести. Взял в логе из вывода "zfs get all otus"
+otus  compression           zle                    local
+
+3. Работа со снапшотами:
+[root@zfs vagrant]# cat /otus/test/task1/file_mess/secret_message 
+https://otus.ru/lessons/linux-hl/
+
+
